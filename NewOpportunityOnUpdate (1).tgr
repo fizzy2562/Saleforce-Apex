@@ -1,0 +1,175 @@
+trigger NewOpportunityOnUpdate on Opportunity (after update) {
+List<OpportunityLineItem> oppLineItem = [select Id,Name,ProductCode,CurrencyIsoCode,Description,Quantity,TotalPrice,OpportunityId,PricebookEntryId from OpportunityLineItem where OpportunityId =:Trigger.New[0].Id];
+List<OpportunityLineItem> newopplistquarterly=new List<OpportunityLineItem>();
+List<OpportunityLineItem> newopplistannual=new List<OpportunityLineItem>();
+OpportunityLineItem lineobjquarterly;
+OpportunityLineItem lineobjannual;
+  if(Trigger.New[0].StageName=='Closed Won' && !Trigger.New[0].Renewal_Created__c)
+  {    
+     for(OpportunityLineItem LineItem : oppLineItem)
+      {
+          
+          if(LineItem.Name.containsIgnoreCase('Quarterly')) //get Quarterly Item List
+          {
+              lineobjquarterly=new OpportunityLineItem();
+              lineobjquarterly.Id=LineItem.Id;
+              newopplistquarterly.add(lineobjquarterly);
+          }
+          else{
+              lineobjannual=new OpportunityLineItem();     //get Annual Item List
+              lineobjannual.Id=LineItem.Id;
+              newopplistannual.add(lineobjannual);
+          }
+      }
+
+     //Handle Quarterly Opportunities List
+     if(newopplistquarterly!=null && !newopplistquarterly.isEmpty()) //insert Quarterly Opprtunity with Item
+          {
+             Opportunity opp = new Opportunity();
+             opp.OwnerId=Trigger.New[0].OwnerId;
+             opp.Name = Trigger.New[0].Name +' (Auto Renewed)';
+             opp.Amount = Trigger.New[0].Amount;
+             opp.CloseDate = Trigger.new[0].CloseDate.addMonths(3);
+             opp.StageName = 'Proposal/Price Quote';
+             opp.ForecastCategoryName = 'Best Case';
+             opp.Probability=50;
+             opp.Renewal_Created__c=true;
+                   
+             opp.AccountId=trigger.new[0].AccountId;
+             opp.CurrencyIsoCode=trigger.New[0].CurrencyIsoCode;               
+             opp.LeadSource=trigger.New[0].LeadSource;
+             opp.Lost_Reasons__c=Trigger.New[0].Lost_Reasons__c;
+             opp.Type=trigger.New[0].Type;
+             opp.Opportunity_Category__c=Trigger.New[0].Opportunity_Category__c;
+             opp.Opportunity_Alignment_Offer_Made__c=Trigger.new[0].Opportunity_Alignment_Offer_Made__c;
+             opp.Auto_Renewal__c=True;
+             opp.Link_to_live_sheet__c=Trigger.New[0].Link_to_live_sheet__c;
+             
+             opp.CampaignId=trigger.New[0].CampaignId; 
+             opp.Budget__c=Trigger.New[0].Budget__c;                           
+             opp.Authourity__c=Trigger.New[0].Authourity__c;
+             opp.Need__c=Trigger.New[0].Need__c;
+             opp.Timing__c=Trigger.New[0].Timing__c;
+             opp.Description=Trigger.New[0].Description;
+             opp.Deal_Size__c=trigger.New[0].Deal_Size__c;                        
+             opp.Primary_Contact_Assigned__c=Trigger.New[0].Primary_Contact_Assigned__c; 
+             opp.NextStep=trigger.New[0].NextStep;                    
+             opp.Prospect_Notes__c=Trigger.New[0].Prospect_Notes__c;
+             opp.Renewal__c=Trigger.New[0].Renewal__c;
+             
+             opp.Named_Pardot_Campaign__c=Trigger.New[0].Named_Pardot_Campaign__c;
+             opp.Legacy_Pricing__c=Trigger.New[0].Legacy_Pricing__c;
+             opp.Lead_Gen_information_Opp__c=Trigger.New[0].Lead_Gen_information_Opp__c;
+             
+             opp.Bread_Winner__Total_Amount_Overdue__c=Trigger.New[0].Bread_Winner__Total_Amount_Overdue__c;
+             opp.Bread_Winner__Total_Amount_Due__c=Trigger.New[0].Bread_Winner__Total_Amount_Due__c;
+             opp.Bread_Winner__Total_Amount_Invoiced__c=Trigger.New[0].Bread_Winner__Total_Amount_Invoiced__c;
+             opp.Bread_Winner__Total_Amount_Paid__c=Trigger.New[0].Bread_Winner__Total_Amount_Paid__c;
+             opp.Bread_Winner__Total_Draft_Amount__c=Trigger.New[0].Bread_Winner__Total_Draft_Amount__c;
+             
+             opp.CHRGFY__Coupon__c=Trigger.New[0].CHRGFY__Coupon__c;
+             opp.CHRGFY__Chargify_Coupon_Counter__c=Trigger.New[0].CHRGFY__Chargify_Coupon_Counter__c;
+             opp.CHRGFY__Chargify_Current_Balance__c=Trigger.New[0].CHRGFY__Chargify_Current_Balance__c;
+             opp.CHRGFY__CHargify_Cancel_Plan__c=trigger.new[0].CHRGFY__CHargify_Cancel_Plan__c;
+             opp.CHRGFY__Coupon_Code__c=Trigger.New[0].CHRGFY__Coupon_Code__c;
+             opp.CHRGFY__Chargify_Payment_Collection_Method__c=trigger.new[0].CHRGFY__Chargify_Payment_Collection_Method__c;
+             opp.CHRGFY__chargify_total_revenue__c=Trigger.new[0].CHRGFY__chargify_total_revenue__c;
+             opp.CHRGFY__Chargify_Current_Version__c=trigger.new[0].CHRGFY__Chargify_Current_Version__c;
+             opp.CHRGFY__chargify_expires_at__c=trigger.new[0].CHRGFY__chargify_expires_at__c;
+             opp.CHRGFY__chargify_next_assessment_at__c=trigger.new[0].CHRGFY__chargify_next_assessment_at__c;
+             opp.CHRGFY__Chargify_Subscription_State__c=trigger.new[0].CHRGFY__Chargify_Subscription_State__c;
+             opp.CHRGFY__Chargify_Subscription_Id__c=trigger.new[0].CHRGFY__Chargify_Subscription_Id__c;
+             opp.CHRGFY__Chargify_SubDomain__c=trigger.new[0].CHRGFY__Chargify_SubDomain__c;
+             opp.DashboardsGSP__Last_Stage_Change_Date__c=trigger.new[0].DashboardsGSP__Last_Stage_Change_Date__c;
+             insert opp;
+                        
+                for(OpportunityLineItem firstloop : newopplistquarterly)
+                {
+                    OpportunityLineItem objquarter=[select Id,Name,ProductCode,CurrencyIsoCode,Description,Quantity,TotalPrice,OpportunityId,PricebookEntryId from OpportunityLineItem where id=:firstloop .Id];
+                    OpportunityLineItem oli = new OpportunityLineItem();
+                    oli.OpportunityId=opp.Id;
+                    //oli.Name=objquarter.Name;
+                    //oli.ProductCode=objquarter.ProductCode;
+                    //oli.CurrencyIsoCode=objquarter.CurrencyIsoCode;
+                    oli.Description=objquarter.Description;
+                    oli.PricebookEntryId=objquarter.PricebookEntryId;
+                    oli.TotalPrice = objquarter.TotalPrice;
+                    oli.Quantity =objquarter.Quantity;
+                    insert oli;
+                }
+          }
+     
+     //Handle Annual Opportunities List
+     if(newopplistannual!=null && !newopplistannual.isEmpty())      //insert annualy Opprtunity with Item
+            {
+             Opportunity opp1 = new Opportunity();
+             opp1.OwnerId=Trigger.New[0].OwnerId;
+             opp1.Name = Trigger.New[0].Name +' (Auto Renewed)';
+             opp1.Amount = Trigger.New[0].Amount;
+             opp1.CloseDate = Trigger.new[0].CloseDate.addMonths(12);
+             opp1.StageName = 'Proposal/Price Quote';
+             opp1.ForecastCategoryName = 'Best Case';
+             opp1.Probability=50;
+             opp1.Renewal_Created__c=true;
+                   
+             opp1.AccountId=trigger.new[0].AccountId;
+             opp1.CurrencyIsoCode=trigger.New[0].CurrencyIsoCode;               
+             opp1.LeadSource=trigger.New[0].LeadSource;
+             opp1.Lost_Reasons__c=Trigger.New[0].Lost_Reasons__c;
+             opp1.Type=trigger.New[0].Type;
+             opp1.opportunity_Category__c=Trigger.New[0].Opportunity_Category__c;
+             opp1.Opportunity_Alignment_Offer_Made__c=Trigger.new[0].Opportunity_Alignment_Offer_Made__c;
+             opp1.Auto_Renewal__c=True;
+             opp1.Link_to_live_sheet__c=Trigger.New[0].Link_to_live_sheet__c;
+             
+             opp1.CampaignId=trigger.New[0].CampaignId; 
+             opp1.Budget__c=Trigger.New[0].Budget__c;                           
+             opp1.Authourity__c=Trigger.New[0].Authourity__c;
+             opp1.Need__c=Trigger.New[0].Need__c;
+             opp1.Timing__c=Trigger.New[0].Timing__c;
+             opp1.Description=Trigger.New[0].Description;
+             opp1.Deal_Size__c=trigger.New[0].Deal_Size__c;                        
+             opp1.Primary_Contact_Assigned__c=Trigger.New[0].Primary_Contact_Assigned__c; 
+             opp1.NextStep=trigger.New[0].NextStep;                    
+             opp1.Prospect_Notes__c=Trigger.New[0].Prospect_Notes__c;
+             opp1.Renewal__c=Trigger.New[0].Renewal__c;
+             
+             opp1.Named_Pardot_Campaign__c=Trigger.New[0].Named_Pardot_Campaign__c;
+             opp1.Legacy_Pricing__c=Trigger.New[0].Legacy_Pricing__c;
+             opp1.Lead_Gen_information_Opp__c=Trigger.New[0].Lead_Gen_information_Opp__c;
+             
+             opp1.Bread_Winner__Total_Amount_Overdue__c=Trigger.New[0].Bread_Winner__Total_Amount_Overdue__c;
+             opp1.Bread_Winner__Total_Amount_Due__c=Trigger.New[0].Bread_Winner__Total_Amount_Due__c;
+             opp1.Bread_Winner__Total_Amount_Invoiced__c=Trigger.New[0].Bread_Winner__Total_Amount_Invoiced__c;
+             opp1.Bread_Winner__Total_Amount_Paid__c=Trigger.New[0].Bread_Winner__Total_Amount_Paid__c;
+             opp1.Bread_Winner__Total_Draft_Amount__c=Trigger.New[0].Bread_Winner__Total_Draft_Amount__c;
+             
+             //opp1.CHRGFY__Coupon__c=Trigger.New[0].CHRGFY__Coupon__c;
+             //opp1.CHRGFY__Chargify_Coupon_Counter__c=Trigger.New[0].CHRGFY__Chargify_Coupon_Counter__c;
+             //opp1.CHRGFY__Chargify_Current_Balance__c=Trigger.New[0].CHRGFY__Chargify_Current_Balance__c;
+             //opp1.CHRGFY__CHargify_Cancel_Plan__c=trigger.new[0].CHRGFY__CHargify_Cancel_Plan__c;
+             //opp1.CHRGFY__Coupon_Code__c=Trigger.New[0].CHRGFY__Coupon_Code__c;
+             //opp1.CHRGFY__Chargify_Payment_Collection_Method__c=trigger.new[0].CHRGFY__Chargify_Payment_Collection_Method__c;
+             //opp1.CHRGFY__chargify_total_revenue__c=Trigger.new[0].CHRGFY__chargify_total_revenue__c;
+             //opp1.CHRGFY__Chargify_Current_Version__c=trigger.new[0].CHRGFY__Chargify_Current_Version__c;
+             //opp1.CHRGFY__chargify_expires_at__c=trigger.new[0].CHRGFY__chargify_expires_at__c;
+             //opp1.CHRGFY__chargify_next_assessment_at__c=trigger.new[0].CHRGFY__chargify_next_assessment_at__c;
+             //opp1.CHRGFY__Chargify_Subscription_State__c=trigger.new[0].CHRGFY__Chargify_Subscription_State__c;
+             //opp1.CHRGFY__Chargify_Subscription_Id__c=trigger.new[0].CHRGFY__Chargify_Subscription_Id__c;
+             //opp1.CHRGFY__Chargify_SubDomain__c=trigger.new[0].CHRGFY__Chargify_SubDomain__c;
+             //opp1.DashboardsGSP__Last_Stage_Change_Date__c=trigger.new[0].DashboardsGSP__Last_Stage_Change_Date__c;
+             insert opp1;
+            for(OpportunityLineItem secondloop : newopplistannual)
+                {
+                    OpportunityLineItem obj=[select Id,Name,ProductCode,CurrencyIsoCode,Description,Quantity,TotalPrice,OpportunityId,PricebookEntryId from OpportunityLineItem where id=:secondloop.Id];
+                    OpportunityLineItem oli1 = new OpportunityLineItem();
+                    oli1.OpportunityId=opp1.Id;
+                    oli1.Description=obj.Description;
+                    oli1.PricebookEntryId=obj.PricebookEntryId;
+                    oli1.TotalPrice =obj.TotalPrice;
+                    oli1.Quantity =obj.Quantity;
+                    insert oli1;
+                }
+              }
+  } 
+}
