@@ -1,0 +1,57 @@
+trigger FastPhone_Activity on Task (after update,after insert, after delete) {
+
+List<Lead> lead = new List<Lead>();
+List<Lead> leadlist = new List<Lead>();
+if( Trigger.isInsert || Trigger.isupdate){
+for(Task tt :trigger.new)
+{ 
+    if(tt.whoId!=null){
+        lead=[select id,Fast_Phone__c from Lead where id =:tt.whoId limit 1]; 
+        if(lead.size()!=0){      
+
+       List<Task> tasklist= [Select id,CreatedDate,Type,whoid,subject From Task  WHERE whoId IN: Lead AND isclosed=true order by CreatedDate asc limit 2];
+       lead[0].Fast_Phone__c=false;
+       
+        for(Lead le: Lead){
+       
+            for (Task ah : tasklist) {
+            if(ah.type==null)
+              ah.type=ah.subject;
+                
+                 if(ah.Type!=null && ah.Type.containsIgnoreCase('call')){
+                    le.Fast_Phone__c=true;             
+                }
+            }
+           }
+        }
+        update lead;
+    }
+}
+}
+
+if(Trigger.isDelete){
+for(Task tt :trigger.old)
+{ 
+    if(tt.whoId!=null){
+        lead=[select id,Fast_Phone__c from Lead where id =:tt.whoId limit 1];       
+        if(lead.size()!=0){      
+
+      List<Task> tasklist= [Select id,CreatedDate,Type,whoid,subject From Task WHERE whoId IN: Lead AND isclosed=true order by CreatedDate asc limit 2];
+       
+        lead[0].Fast_Phone__c=false;
+         for(Lead le: Lead){
+          
+            for (Task ah : Tasklist) {
+             if(ah.type==null)
+              ah.type=ah.subject;
+                if(ah.Type!=null && ah.Type.containsIgnoreCase('call')){
+                    le.Fast_Phone__c=true;             
+                }
+            }
+         }
+        }
+        update lead;
+    }
+}
+}
+}
