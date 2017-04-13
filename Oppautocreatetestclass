@@ -1,0 +1,74 @@
+@isTest(seeAllData=true)
+public class NewOpportunityOnUpdate_Ut {
+        public static testmethod void NewOpportunity(){
+        Boolean Test=true;
+        Account acc=new Account();
+        acc.Name='fini123!@#';
+        acc.CurrencyIsoCode='EUR';
+        acc.Industry='Banking';
+        acc.Business_Team__c='Enterprise';
+        acc.Customer_Journey_Category__c='Cat 1: >50 licences and/or potential for >50 licences';
+        insert acc;
+        Opportunity opp = new Opportunity();
+        opp.Name ='hello';
+        opp.CloseDate=system.Today();
+        opp.StageName='Qualification';
+        opp.ForecastCategoryName = 'Best Case';
+        opp.Business_Team__c='Enterprise';
+        opp.CurrencyIsoCode='EUR';
+        opp.LeadSource='Event';
+        opp.AccountId=acc.Id;
+        insert opp;
+      
+        Product2 p = new product2(name='x');
+        insert p;
+        Pricebook2 stdPb = [select Id from Pricebook2 where isStandard=true limit 1];
+        insert new PricebookEntry(pricebook2id = stdPb.id, product2id = p.id,unitprice=1.0, isActive=true);
+        Pricebook2 pb = new pricebook2(name='Quarterly');
+        insert pb;
+        PricebookEntry pbe = new PricebookEntry(pricebook2id=pb.id, product2id=p.id,unitprice=1.0, isActive=true);
+        insert pbe;
+                    
+        OpportunityLineItem LineItem=new OpportunityLineItem();
+        LineItem.OpportunityId=opp.Id;
+        LineItem.PricebookEntryId=pbe.Id;
+        LineItem.TotalPrice =8768;
+        LineItem.Quantity=45;
+        insert LineItem;
+        
+        opp.StageName='Closed Won';
+        opp.Name='hello Annually';
+        update opp;
+          
+        Opportunity opp1 = new Opportunity();
+        opp1.Name ='hello';
+        opp1.CloseDate=system.Today();
+        opp1.StageName='Qualification';
+        opp1.ForecastCategoryName = 'Best Case';
+        opp1.Business_Team__c='Enterprise';
+        opp1.CurrencyIsoCode='EUR';
+        opp1.LeadSource='Event';
+        opp1.AccountId=acc.Id;
+        insert opp1;
+      
+        Product2 p1 = new product2(name='x');
+        insert p1;
+        Pricebook2 stdPb1 = [select Id from Pricebook2 where isStandard=true limit 1];
+        insert new PricebookEntry(pricebook2id = stdPb1.id, product2id = p1.id,unitprice=1.0, isActive=true);
+        Pricebook2 pb1 = new pricebook2(name='Quarterly');
+        insert pb1;
+        PricebookEntry pbe1 = new PricebookEntry(pricebook2id=pb1.id, product2id=p1.id,unitprice=1.0, isActive=true);
+        insert pbe1;
+                    
+        OpportunityLineItem LineItem1=new OpportunityLineItem();
+        LineItem1.OpportunityId=opp1.Id;
+        LineItem1.PricebookEntryId=pbe1.Id;
+        LineItem1.TotalPrice =8768;
+        LineItem1.Quantity=45;
+        insert LineItem1;   
+          
+        opp1.StageName='Closed Won';
+        opp1.Name='hello Quarterly';
+        update opp1;
+    }
+ }
